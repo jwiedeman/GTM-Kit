@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/jwiedeman/GTM-Kit/compare/v1.2.0...v1.2.1) (2026-02-07)
+
+### Bug Fixes
+
+- comprehensive review — security hardening, bug fixes, and API improvements ([e1140d3](https://github.com/jwiedeman/GTM-Kit/commit/e1140d3d22753dd33521217947cbc5d92a93fba4))
+
 # [1.2.0](https://github.com/jwiedeman/GTM-Kit/compare/v1.1.6...v1.2.0) (2026-01-22)
 
 ### Features
