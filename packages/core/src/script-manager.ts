@@ -256,9 +256,11 @@ export class ScriptManager {
 
     this.retryCounters.set(containerId, currentAttempt + 1);
 
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
+      this.activeTimeouts.delete(containerId);
       this.loadScript(container, targetParent);
     }, delay);
+    this.activeTimeouts.set(containerId, timerId);
   }
 
   /**
@@ -328,6 +330,13 @@ export class ScriptManager {
 
       if (key === 'nonce') {
         script.nonce = stringValue;
+        continue;
+      }
+
+      // Block src (already set) and event handler attributes to prevent XSS
+      const lowerKey = key.toLowerCase();
+      if (lowerKey === 'src' || lowerKey.startsWith('on')) {
+        continue;
       }
 
       script.setAttribute(key, stringValue);
@@ -429,12 +438,9 @@ export class ScriptManager {
             this.insertedScripts.delete(script);
             this.scheduleRetry(container, targetParent);
           } else {
-            settle('failed');
-            // Override with timeout-specific error
-            const state = this.loadStates.get(containerId);
-            if (state) {
-              state.error = `Script load timeout (${this.scriptTimeout}ms)`;
-            }
+            settled = true;
+            this.clearContainerTimeout(containerId);
+            this.handleFinalFailure(containerId, url, `Script load timeout (${this.scriptTimeout}ms)`, true);
           }
         }
       }, this.scriptTimeout);

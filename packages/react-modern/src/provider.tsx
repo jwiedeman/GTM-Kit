@@ -55,6 +55,30 @@ export const useHydrated = (): boolean => {
 
 export interface GtmProviderProps extends PropsWithChildren {
   config: CreateGtmClientOptions;
+
+  /**
+   * Callback executed before GTM initialization.
+   * Use this to set consent defaults.
+   *
+   * @example
+   * ```tsx
+   * <GtmProvider
+   *   config={{ containers: 'GTM-XXXXXX' }}
+   *   onBeforeInit={(client) => {
+   *     client.setConsentDefaults({
+   *       ad_storage: 'denied',
+   *       analytics_storage: 'denied'
+   *     });
+   *   }}
+   * >
+   * ```
+   */
+  onBeforeInit?: (client: GtmClient) => void;
+
+  /**
+   * Callback executed after GTM initialization.
+   */
+  onAfterInit?: (client: GtmClient) => void;
 }
 
 export interface GtmContextValue {
@@ -199,7 +223,7 @@ const useStableClient = (config: CreateGtmClientOptions): GtmClient => {
  * return isGtmReady ? <TrackedContent /> : <LoadingContent />;
  * ```
  */
-export const GtmProvider = ({ config, children }: GtmProviderProps): JSX.Element => {
+export const GtmProvider = ({ config, children, onBeforeInit, onAfterInit }: GtmProviderProps): JSX.Element => {
   const existingContext = useContext(GtmContext);
 
   // Warn if we're inside another GtmProvider (nested providers)
@@ -214,21 +238,36 @@ export const GtmProvider = ({ config, children }: GtmProviderProps): JSX.Element
     return <>{children}</>;
   }
 
-  return <GtmProviderInner config={config}>{children}</GtmProviderInner>;
+  return (
+    <GtmProviderInner config={config} onBeforeInit={onBeforeInit} onAfterInit={onAfterInit}>
+      {children}
+    </GtmProviderInner>
+  );
 };
 
-const GtmProviderInner = ({ config, children }: GtmProviderProps): JSX.Element => {
+const GtmProviderInner = ({ config, children, onBeforeInit, onAfterInit }: GtmProviderProps): JSX.Element => {
   const client = useStableClient(config);
 
   useEffect(() => {
     // Check for orphaned SSR scripts before initializing
     warnOnOrphanedSsrScripts(extractContainerIds(config));
 
+    // Call onBeforeInit hook for consent defaults
+    if (onBeforeInit) {
+      onBeforeInit(client);
+    }
+
     client.init();
+
+    // Call onAfterInit hook
+    if (onAfterInit) {
+      onAfterInit(client);
+    }
+
     return () => {
       client.teardown();
     };
-  }, [client, config]);
+  }, [client, config, onBeforeInit, onAfterInit]);
 
   const value = useMemo<GtmContextValue>(
     () => ({

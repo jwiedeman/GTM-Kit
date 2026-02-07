@@ -146,6 +146,52 @@ describe('GtmProvider', () => {
     expect(client.teardown).toHaveBeenCalledTimes(1);
   });
 
+  it('calls onBeforeInit before init and onAfterInit after init', async () => {
+    const client = createMockClient();
+    mockedCreateClient.mockReturnValue(client);
+    const callOrder: string[] = [];
+
+    client.init.mockImplementation(() => {
+      callOrder.push('init');
+    });
+
+    const onBeforeInit = jest.fn(() => {
+      callOrder.push('onBeforeInit');
+    });
+    const onAfterInit = jest.fn(() => {
+      callOrder.push('onAfterInit');
+    });
+
+    render(
+      <GtmProvider config={baseConfig} onBeforeInit={onBeforeInit} onAfterInit={onAfterInit}>
+        <div />
+      </GtmProvider>
+    );
+
+    await waitFor(() => {
+      expect(client.init).toHaveBeenCalledTimes(1);
+    });
+
+    expect(onBeforeInit).toHaveBeenCalledWith(client);
+    expect(onAfterInit).toHaveBeenCalledWith(client);
+    expect(callOrder).toEqual(['onBeforeInit', 'init', 'onAfterInit']);
+  });
+
+  it('works without onBeforeInit/onAfterInit callbacks', async () => {
+    const client = createMockClient();
+    mockedCreateClient.mockReturnValue(client);
+
+    render(
+      <GtmProvider config={baseConfig}>
+        <div />
+      </GtmProvider>
+    );
+
+    await waitFor(() => {
+      expect(client.init).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('tears down between mounts to remain StrictMode-safe', async () => {
     const clients: MockClient[] = [];
     mockedCreateClient.mockImplementation(() => {

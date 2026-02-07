@@ -835,7 +835,7 @@ describe('Timing and Lifecycle Edge Cases', () => {
   });
 
   describe('Delayed consent scenarios', () => {
-    it('handles consent set long after initialization', () => {
+    it('throws when consent defaults set long after initialization', () => {
       const client = createGtmClient({ containers: 'GTM-DELAYED-CONSENT' });
       client.init();
 
@@ -845,17 +845,19 @@ describe('Timing and Lifecycle Edge Cases', () => {
       // Wait 5 seconds
       jest.advanceTimersByTime(5000);
 
-      // Now set consent
-      client.setConsentDefaults({ analytics_storage: 'denied' });
+      // Setting consent defaults after init should throw
+      expect(() => {
+        client.setConsentDefaults({ analytics_storage: 'denied' });
+      }).toThrow(/must be called BEFORE init/);
 
-      // Update consent
+      // Update consent still works after init
       jest.advanceTimersByTime(2000);
       client.updateConsent({ analytics_storage: 'granted' });
 
       const dataLayer = (globalThis as Record<string, unknown>).dataLayer as unknown[];
       const consentEntries = dataLayer.filter((e) => Array.isArray(e) && e[0] === 'consent');
 
-      expect(consentEntries.length).toBeGreaterThanOrEqual(2);
+      expect(consentEntries.length).toBeGreaterThanOrEqual(1);
     });
 
     it('handles consent update before init', () => {

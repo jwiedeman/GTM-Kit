@@ -232,6 +232,8 @@ export class GtmClientImpl implements GtmClient {
       return;
     }
 
+    this.initialized = true;
+
     this.logger.info('Initializing GTM client.', {
       containers: this.containers.map((container) => container.id),
       dataLayerName: this.resolvedDataLayerName
@@ -291,8 +293,6 @@ export class GtmClientImpl implements GtmClient {
     this.pushStartEvent();
     this.flushQueue();
     this.scriptManager.ensure(this.containers);
-
-    this.initialized = true;
   }
 
   /**
@@ -363,13 +363,12 @@ export class GtmClientImpl implements GtmClient {
   }
 
   setConsentDefaults(state: ConsentState, options?: ConsentRegionOptions): void {
-    // Warn if called after init - consent defaults should be set BEFORE GTM loads
+    // Error if called after init - consent defaults MUST be set BEFORE GTM loads
     if (this.initialized) {
-      this.logger.warn(
-        'setConsentDefaults() called after init(). ' +
-          'Consent defaults should be set BEFORE calling init() to ensure proper tag behavior. ' +
-          'The defaults will still be pushed, but GTM may have already fired tags with implied consent.',
-        { state, options }
+      throw new Error(
+        'setConsentDefaults() must be called BEFORE init(). ' +
+          'Google requires consent defaults to be set before GTM loads to ensure proper tag behavior. ' +
+          'Move your setConsentDefaults() call before client.init().'
       );
     }
 
@@ -829,7 +828,7 @@ export class GtmClientImpl implements GtmClient {
     }
 
     // Remove at least 1 entry to make room for the incoming push
-    const targetTrimCount = Math.max(1, excess + 1);
+    const targetTrimCount = Math.max(1, excess);
     let trimmedCount = 0;
     let index = 0;
 

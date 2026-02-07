@@ -27,6 +27,16 @@ export const initGtm = (options: CreateGtmClientOptions): GtmClient => {
   // If already initialized, return existing instance
   // (common in Astro with view transitions where initGtm may be called multiple times)
   if (clientInstance) {
+    if (
+      process.env.NODE_ENV === 'development' &&
+      clientConfig &&
+      JSON.stringify(options) !== JSON.stringify(clientConfig)
+    ) {
+      console.warn(
+        '[gtm-kit/astro] initGtm() called again with different options. ' +
+          'The original configuration is kept. Call teardown() first if you need to reinitialize with new options.'
+      );
+    }
     return clientInstance;
   }
 

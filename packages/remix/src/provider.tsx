@@ -169,16 +169,26 @@ function GtmProviderInner({ config, children, onBeforeInit, onAfterInit }: GtmPr
     // Cleanup on unmount - defer to allow StrictMode remount
     return () => {
       teardownTimerRef.current = setTimeout(() => {
+        teardownTimerRef.current = null;
         // Only teardown if we're truly unmounting (no provider in DOM)
         if (!document.querySelector('[data-gtm-kit-provider]')) {
           client.teardown();
           clientRef.current = null;
           initializedRef.current = false;
         }
-        teardownTimerRef.current = null;
       }, 100);
     };
   }, [client, onBeforeInit, onAfterInit]);
+
+  // Clear deferred teardown timer on final unmount to prevent leaked timers
+  useEffect(() => {
+    return () => {
+      if (teardownTimerRef.current) {
+        clearTimeout(teardownTimerRef.current);
+        teardownTimerRef.current = null;
+      }
+    };
+  }, []);
 
   // Memoize context value
   const contextValue = useMemo<GtmContextValue>(

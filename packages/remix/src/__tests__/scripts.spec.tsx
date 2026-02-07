@@ -81,12 +81,10 @@ describe('GtmScripts', () => {
       expect(script?.innerHTML).toContain('\\x3cscript\\x3e');
     });
 
-    it('escapes single quotes in dataLayerName', () => {
-      const { container } = render(<GtmScripts containers="GTM-ABC123" dataLayerName="test'Layer" />);
-
-      const script = container.querySelector('script');
-      expect(script?.innerHTML).not.toContain("test'Layer");
-      expect(script?.innerHTML).toContain("test\\'Layer");
+    it('rejects invalid dataLayerName', () => {
+      expect(() => {
+        render(<GtmScripts containers="GTM-ABC123" dataLayerName="test'Layer" />);
+      }).toThrow('Invalid dataLayerName');
     });
 
     it('escapes single quotes in nonce', () => {

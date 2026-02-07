@@ -14,7 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..');
 
 // Packages that have workspace dependencies
-const packagesWithDeps = ['react-modern', 'react-legacy', 'next', 'remix', 'vue', 'nuxt', 'svelte', 'solid'];
+const packagesWithDeps = ['react-modern', 'react-legacy', 'next', 'remix', 'vue', 'nuxt', 'svelte', 'solid', 'astro'];
 
 // Map of workspace package names to their directories
 const packageMap = {

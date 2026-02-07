@@ -227,6 +227,10 @@ While `@jwiedeman/gtm-kit` works standalone, we provide framework-specific adapt
 | Vue 3         | `@jwiedeman/gtm-kit-vue`          | `npm install @jwiedeman/gtm-kit @jwiedeman/gtm-kit-vue`          |
 | Nuxt 3        | `@jwiedeman/gtm-kit-nuxt`         | `npm install @jwiedeman/gtm-kit @jwiedeman/gtm-kit-nuxt`         |
 | Next.js       | `@jwiedeman/gtm-kit-next`         | `npm install @jwiedeman/gtm-kit @jwiedeman/gtm-kit-next`         |
+| Svelte        | `@jwiedeman/gtm-kit-svelte`       | `npm install @jwiedeman/gtm-kit @jwiedeman/gtm-kit-svelte`       |
+| SolidJS       | `@jwiedeman/gtm-kit-solid`        | `npm install @jwiedeman/gtm-kit @jwiedeman/gtm-kit-solid`        |
+| Remix         | `@jwiedeman/gtm-kit-remix`        | `npm install @jwiedeman/gtm-kit @jwiedeman/gtm-kit-remix`        |
+| Astro         | `@jwiedeman/gtm-kit-astro`        | `npm install @jwiedeman/gtm-kit @jwiedeman/gtm-kit-astro`        |
 
 ---
 

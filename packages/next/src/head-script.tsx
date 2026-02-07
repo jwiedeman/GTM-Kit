@@ -55,11 +55,13 @@ export const GtmHeadScript = ({
         }
 
         for (const [attribute, value] of Object.entries(restAttributes)) {
-          if (attribute === 'async' || attribute === 'defer' || attribute === 'nonce' || attribute === 'src') {
+          if (value === undefined || value === null) {
             continue;
           }
 
-          if (value === undefined || value === null) {
+          // Block src (already set) and event handler attributes to prevent XSS
+          const lowerAttr = attribute.toLowerCase();
+          if (lowerAttr === 'src' || lowerAttr.startsWith('on')) {
             continue;
           }
 

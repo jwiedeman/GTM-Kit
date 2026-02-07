@@ -191,13 +191,32 @@ if (hasProvider) {
 
 ### Setting Consent Defaults Before GTM Loads
 
-To set consent defaults before GTM initializes, use `useGtmConsent` in a component that renders early:
+**Recommended:** Use the `onBeforeInit` callback to set consent defaults before GTM loads:
+
+```tsx
+import { GtmProvider } from '@jwiedeman/gtm-kit-react';
+import { consentPresets } from '@jwiedeman/gtm-kit';
+
+function App() {
+  return (
+    <GtmProvider
+      config={{ containers: 'GTM-XXXXXX' }}
+      onBeforeInit={(client) => {
+        client.setConsentDefaults(consentPresets.eeaDefault, { region: ['EEA'] });
+      }}
+    >
+      <YourApp />
+    </GtmProvider>
+  );
+}
+```
+
+**Alternative:** Use `useGtmConsent` in a child component (child effects run before parent effects in React):
 
 ```tsx
 import { GtmProvider, useGtmConsent } from '@jwiedeman/gtm-kit-react';
 import { consentPresets } from '@jwiedeman/gtm-kit';
 
-// Component that sets consent defaults on mount
 function ConsentInitializer({ children }) {
   const { setConsentDefaults } = useGtmConsent();
 
@@ -208,7 +227,6 @@ function ConsentInitializer({ children }) {
   return <>{children}</>;
 }
 
-// App wrapper
 function App() {
   return (
     <GtmProvider config={{ containers: 'GTM-XXXXXX' }}>
@@ -277,10 +295,24 @@ updateConsent({ ad_storage: 'granted', ad_user_data: 'granted' });
     host: 'https://custom.host.com', // Optional
     scriptAttributes: { nonce: '...' } // Optional: CSP
   }}
+  onBeforeInit={(client) => {
+    // Called before GTM loads - ideal for consent defaults
+    client.setConsentDefaults(consentPresets.eeaDefault, { region: ['EEA'] });
+  }}
+  onAfterInit={(client) => {
+    // Called after GTM loads
+    console.log('GTM initialized');
+  }}
 >
   {children}
 </GtmProvider>
 ```
+
+| Prop             | Type                        | Required | Description                                       |
+| ---------------- | --------------------------- | -------- | ------------------------------------------------- |
+| `config`         | `CreateGtmClientOptions`    | Yes      | GTM client configuration (containers, host, etc.) |
+| `onBeforeInit`   | `(client: GtmClient) => void` | No    | Called before GTM initialization — use for consent defaults |
+| `onAfterInit`    | `(client: GtmClient) => void` | No    | Called after GTM initialization                    |
 
 ---
 

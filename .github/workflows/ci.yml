@@ -77,6 +77,7 @@ jobs:
             packages/svelte/coverage/unit/lcov.info
             packages/solid/coverage/unit/lcov.info
             packages/remix/coverage/unit/lcov.info
+            packages/astro/coverage/unit/lcov.info
             packages/cli/coverage/unit/lcov.info
           flags: unittests
           fail_ci_if_error: false

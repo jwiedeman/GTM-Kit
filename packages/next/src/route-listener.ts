@@ -93,10 +93,10 @@ export const useTrackPageViews = ({
   const previousRef = useRef<RouteSnapshot | null>(null);
   const hasTrackedRef = useRef(false);
   const pendingKeyRef = useRef<string | null>(null);
-  const readinessRef = useRef<Promise<ScriptLoadState[]> | null>(
-    waitForReady ? (readyPromise ?? client.whenReady()) : null
-  );
   const isMountedRef = useRef(true);
+
+  // Compute readiness promise inline to avoid stale ref from separate useEffect
+  const readinessPromise = waitForReady ? (readyPromise ?? client.whenReady()) : null;
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -104,10 +104,6 @@ export const useTrackPageViews = ({
       isMountedRef.current = false;
     };
   }, []);
-
-  useEffect(() => {
-    readinessRef.current = waitForReady ? (readyPromise ?? client.whenReady()) : null;
-  }, [client, readyPromise, waitForReady]);
 
   const logFailures = useCallback((states: ScriptLoadState[]) => {
     const failed = states.filter((state) => state.status === 'failed');
@@ -184,9 +180,9 @@ export const useTrackPageViews = ({
         hasTrackedRef.current = true;
       };
 
-      if (waitForReady && readinessRef.current) {
+      if (waitForReady && readinessPromise) {
         pendingKeyRef.current = key;
-        readinessRef.current
+        readinessPromise
           .then((states) => {
             if (!isMountedRef.current || pendingKeyRef.current !== key) {
               return;
@@ -209,7 +205,7 @@ export const useTrackPageViews = ({
 
       pushPayload();
     },
-    [buildPayload, client, eventName, logFailures, pushEventFn, skipSamePath, trackHash, trackOnMount, waitForReady]
+    [buildPayload, client, eventName, logFailures, pushEventFn, readinessPromise, skipSamePath, trackHash, trackOnMount, waitForReady]
   );
 
   useEffect(() => {

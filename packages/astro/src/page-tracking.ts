@@ -77,6 +77,7 @@ export const trackPageView = (options: TrackPageViewOptions = {}): void => {
 };
 
 let viewTransitionsSetup = false;
+let pageTrackingSetup = false;
 let lastTrackedPath = '';
 
 /**
@@ -85,6 +86,7 @@ let lastTrackedPath = '';
  */
 export const _resetPageTrackingState = (): void => {
   viewTransitionsSetup = false;
+  pageTrackingSetup = false;
   lastTrackedPath = '';
 };
 
@@ -161,6 +163,13 @@ export const setupPageTracking = (options: TrackPageViewOptions = {}): (() => vo
     return noop;
   }
 
+  // Prevent duplicate setup
+  if (pageTrackingSetup) {
+    return noop;
+  }
+
+  pageTrackingSetup = true;
+
   // Track initial page view
   lastTrackedPath = window.location.pathname + window.location.search;
   trackPageView(options);
@@ -181,6 +190,7 @@ export const setupPageTracking = (options: TrackPageViewOptions = {}): (() => vo
 
   return () => {
     window.removeEventListener('popstate', handlePopState);
+    pageTrackingSetup = false;
     lastTrackedPath = '';
   };
 };

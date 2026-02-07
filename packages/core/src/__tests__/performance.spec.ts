@@ -756,6 +756,7 @@ describe('Heap Profiling - Long Running Sessions', () => {
         containers: `GTM-LIFECYCLE-${cycle}`,
         maxDataLayerSize: 100
       });
+      client.setConsentDefaults({ ad_storage: 'denied' });
       client.init();
 
       // Simulate usage
@@ -763,7 +764,6 @@ describe('Heap Profiling - Long Running Sessions', () => {
         client.push({ event: `cycle_${cycle}_event_${i}` });
       }
 
-      client.setConsentDefaults({ ad_storage: 'denied' });
       client.updateConsent({ ad_storage: 'granted' });
 
       client.teardown();

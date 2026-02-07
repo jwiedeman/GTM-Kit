@@ -80,6 +80,11 @@ export const GtmNoScript = ({
             continue;
           }
 
+          // Block event handler attributes to prevent XSS
+          if (attribute.toLowerCase().startsWith('on')) {
+            continue;
+          }
+
           if (attribute === 'style') {
             if (typeof value === 'string') {
               iframeProps.style = parseStyle(value);

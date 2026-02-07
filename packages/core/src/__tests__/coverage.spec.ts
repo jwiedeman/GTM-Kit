@@ -290,17 +290,13 @@ describe('Client edge cases', () => {
     expect(consentIndex).toBeLessThan(eventIndex);
   });
 
-  it('skips duplicate consent commands when pushing after init', () => {
+  it('throws when setConsentDefaults is called after init', () => {
     const client = createGtmClient({ containers: 'GTM-POST-INIT-DEDUP' });
     client.init();
 
-    client.setConsentDefaults({ ad_storage: 'denied' });
-    client.setConsentDefaults({ ad_storage: 'denied' }); // Duplicate
-
-    const dataLayer = (globalThis as Record<string, unknown>).dataLayer as unknown[];
-    const consentCommands = dataLayer.filter((item) => Array.isArray(item) && item[0] === 'consent');
-
-    expect(consentCommands.length).toBe(1);
+    expect(() => {
+      client.setConsentDefaults({ ad_storage: 'denied' });
+    }).toThrow(/must be called BEFORE init/);
   });
 
   it('skips gtm.js event when already present in dataLayer snapshot', () => {
@@ -352,15 +348,16 @@ describe('Client edge cases', () => {
     (globalThis as Record<string, unknown>).dataLayer = [['consent', 'default', { ad_storage: 'denied' }]];
 
     const client = createGtmClient({ containers: 'GTM-CONSENT-HYDRATION' });
-    client.init();
 
-    // Push same consent command again
+    // Push same consent command before init (already in snapshot)
     client.setConsentDefaults({ ad_storage: 'denied' });
+
+    client.init();
 
     const dataLayer = (globalThis as Record<string, unknown>).dataLayer as unknown[];
     const consentCommands = dataLayer.filter((item) => Array.isArray(item) && item[0] === 'consent');
 
-    // Should only have the original consent command
+    // Should only have the original consent command (deduplicated during hydration)
     expect(consentCommands.length).toBe(1);
   });
 

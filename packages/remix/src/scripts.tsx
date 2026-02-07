@@ -123,11 +123,26 @@ export function GtmScripts({
   dataLayerName = 'dataLayer',
   scriptAttributes = {}
 }: GtmScriptsProps): React.ReactElement {
+  // Validate dataLayerName is a valid JavaScript identifier
+  if (!/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(dataLayerName)) {
+    throw new Error(
+      `[gtm-kit/remix] Invalid dataLayerName "${dataLayerName}". Must be a valid JavaScript identifier.`
+    );
+  }
+
   const containerConfigs = normalizeContainers(containers);
+
+  // Filter out event handler attributes to prevent XSS
+  const safeScriptAttributes: Record<string, string> = {};
+  for (const [key, value] of Object.entries(scriptAttributes)) {
+    if (!key.toLowerCase().startsWith('on')) {
+      safeScriptAttributes[key] = value;
+    }
+  }
 
   // Escape values for safe use in JavaScript string literals
   const safeDataLayerName = escapeJsString(dataLayerName);
-  const safeNonce = scriptAttributes.nonce ? escapeJsString(scriptAttributes.nonce) : '';
+  const safeNonce = safeScriptAttributes.nonce ? escapeJsString(safeScriptAttributes.nonce) : '';
 
   // Generate inline script for dataLayer initialization and GTM loading
   const inlineScript = `
@@ -152,7 +167,7 @@ export function GtmScripts({
 
   return (
     <>
-      <script {...scriptAttributes} dangerouslySetInnerHTML={{ __html: inlineScript }} />
+      <script {...safeScriptAttributes} dangerouslySetInnerHTML={{ __html: inlineScript }} />
       <noscript dangerouslySetInnerHTML={{ __html: noscriptHtml }} />
     </>
   );

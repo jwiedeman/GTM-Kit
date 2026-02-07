@@ -44,8 +44,7 @@
     }
   },
   "files": [
-    "dist",
-    "src/components/*.astro"
+    "dist"
   ],
   "scripts": {
     "build": "tsup",
