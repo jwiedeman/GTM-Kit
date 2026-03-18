@@ -64,11 +64,25 @@ export interface ScriptTagData {
   defer?: boolean;
   nonce?: string;
   attributes: Record<string, string | boolean>;
+  /**
+   * Inline JavaScript that must be executed before the GTM script loads.
+   * Initializes the dataLayer and pushes the gtm.start event, which is
+   * required for GTM's built-in "All Pages" trigger to fire.
+   *
+   * Render this as a `<script>` tag (or `<script is:inline>` in Astro)
+   * immediately before the GTM `<script async src="...">` tag.
+   */
+  initScript: string;
 }
 
 /**
  * Generate script tag data for GTM containers.
  * Used by Astro components to render script tags.
+ *
+ * Each tag includes an `initScript` property containing the dataLayer
+ * initialization and gtm.start event push. This MUST be rendered as an
+ * inline script before the GTM script tag, or GTM's "All Pages" trigger
+ * will not fire.
  */
 export const generateScriptTags = (config: GtmScriptConfig): ScriptTagData[] => {
   const {
@@ -85,6 +99,10 @@ export const generateScriptTags = (config: GtmScriptConfig): ScriptTagData[] => 
     throw new Error('At least one GTM container is required.');
   }
 
+  if (!isValidJsIdentifier(dataLayerName)) {
+    throw new Error(`Invalid dataLayerName: "${dataLayerName}". Must be a valid JavaScript identifier.`);
+  }
+
   return normalized.map((container) => {
     if (!container.id) {
       throw new Error('Container id is required.');
@@ -98,15 +116,81 @@ export const generateScriptTags = (config: GtmScriptConfig): ScriptTagData[] => 
     const src = buildGtmScriptUrl(host, container.id, params, dataLayerName);
     const { async: asyncAttr, defer, nonce, ...restAttributes } = scriptAttributes ?? {};
 
+    // Generate the standard GTM initialization script.
+    // This pushes the gtm.start event to the dataLayer, which is required
+    // for GTM to trigger its built-in "All Pages" / "Container Loaded" trigger.
+    const initScript =
+      `window.${dataLayerName}=window.${dataLayerName}||[];` +
+      `window.${dataLayerName}.push({'gtm.start':new Date().getTime(),event:'gtm.js'});`;
+
     return {
       id: container.id,
       src,
       async: asyncAttr ?? true,
       defer,
       nonce,
-      attributes: filterNullish(restAttributes) as Record<string, string | boolean>
+      attributes: filterNullish(restAttributes) as Record<string, string | boolean>,
+      initScript
     };
   });
+};
+
+/**
+ * Generate the complete standard GTM snippet as an inline script string.
+ *
+ * This produces the Google-recommended GTM installation code that:
+ * 1. Initializes the dataLayer array
+ * 2. Pushes the gtm.start event (required for "All Pages" trigger)
+ * 3. Dynamically creates and inserts the GTM script element
+ *
+ * Usage in Astro:
+ * ```astro
+ * <script is:inline set:html={generateGtmScript({ containers: 'GTM-XXXX' })} />
+ * ```
+ *
+ * For the noscript fallback, use `generateNoscriptTags()` separately.
+ */
+export const generateGtmScript = (config: Omit<GtmScriptConfig, 'scriptAttributes'>): string => {
+  const { containers, host = DEFAULT_GTM_HOST, defaultQueryParams, dataLayerName = DEFAULT_DATA_LAYER_NAME } = config;
+
+  const normalized = normalizeContainers(containers);
+
+  if (!normalized.length) {
+    throw new Error('At least one GTM container is required.');
+  }
+
+  if (!isValidJsIdentifier(dataLayerName)) {
+    throw new Error(`Invalid dataLayerName: "${dataLayerName}". Must be a valid JavaScript identifier.`);
+  }
+
+  // Generate one standard snippet per container
+  return normalized
+    .map((container) => {
+      if (!container.id) {
+        throw new Error('Container id is required.');
+      }
+
+      const escapedId = escapeJsString(container.id);
+
+      // Build query params string for additional params (auth, preview, etc.)
+      const mergedParams = { ...defaultQueryParams, ...container.queryParams };
+      const extraParams = Object.entries(mergedParams)
+        .filter(([, v]) => v != null)
+        .map(([k, v]) => `&${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+        .join('');
+
+      const hostUrl = (host ?? DEFAULT_GTM_HOST).replace(/\/+$/, '');
+
+      // Standard GTM snippet — matches Google's recommended installation
+      return (
+        `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':` +
+        `new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],` +
+        `j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=` +
+        `'${escapeJsString(hostUrl)}/gtm.js?id='+i+dl${extraParams ? `+'${escapeJsString(extraParams)}'` : ''};f.parentNode.insertBefore(j,f);` +
+        `})(window,document,'script','${escapeJsString(dataLayerName)}','${escapedId}');`
+      );
+    })
+    .join('\n');
 };
 
 export interface NoscriptTagData {

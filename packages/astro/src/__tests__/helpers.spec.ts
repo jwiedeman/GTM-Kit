@@ -6,6 +6,7 @@ import {
   generateScriptTags,
   generateNoscriptTags,
   generateDataLayerScript,
+  generateGtmScript,
   isValidJsIdentifier,
   escapeJsString,
   DEFAULT_GTM_HOST
@@ -75,7 +76,7 @@ describe('Component Helpers', () => {
       const tags = generateScriptTags({ containers: 'GTM-ABC123' });
 
       expect(tags).toHaveLength(1);
-      expect(tags[0]).toEqual({
+      expect(tags[0]).toMatchObject({
         id: 'GTM-ABC123',
         src: 'https://www.googletagmanager.com/gtm.js?id=GTM-ABC123',
         async: true,
@@ -85,12 +86,29 @@ describe('Component Helpers', () => {
       });
     });
 
+    it('should include initScript with gtm.start event push', () => {
+      const tags = generateScriptTags({ containers: 'GTM-ABC123' });
+
+      expect(tags[0].initScript).toContain('window.dataLayer=window.dataLayer||[];');
+      expect(tags[0].initScript).toContain("'gtm.start'");
+      expect(tags[0].initScript).toContain("event:'gtm.js'");
+    });
+
+    it('should use custom dataLayer name in initScript', () => {
+      const tags = generateScriptTags({ containers: 'GTM-ABC123', dataLayerName: 'myDL' });
+
+      expect(tags[0].initScript).toContain('window.myDL=window.myDL||[];');
+      expect(tags[0].initScript).toContain('window.myDL.push(');
+    });
+
     it('should generate script tags for multiple containers', () => {
       const tags = generateScriptTags({ containers: ['GTM-ABC123', 'GTM-DEF456'] });
 
       expect(tags).toHaveLength(2);
       expect(tags[0].id).toBe('GTM-ABC123');
       expect(tags[1].id).toBe('GTM-DEF456');
+      expect(tags[0].initScript).toBeDefined();
+      expect(tags[1].initScript).toBeDefined();
     });
 
     it('should include script attributes', () => {
@@ -114,6 +132,72 @@ describe('Component Helpers', () => {
 
     it('should throw for missing container id', () => {
       expect(() => generateScriptTags({ containers: { id: '' } })).toThrow('Container id is required');
+    });
+
+    it('should throw for invalid dataLayerName', () => {
+      expect(() => generateScriptTags({ containers: 'GTM-ABC123', dataLayerName: "'; alert('XSS');" })).toThrow(
+        'Invalid dataLayerName'
+      );
+    });
+  });
+
+  describe('generateGtmScript', () => {
+    it('should generate the standard GTM snippet', () => {
+      const script = generateGtmScript({ containers: 'GTM-ABC123' });
+
+      expect(script).toContain("'gtm.start'");
+      expect(script).toContain("event:'gtm.js'");
+      expect(script).toContain('GTM-ABC123');
+      expect(script).toContain('gtm.js?id=');
+      expect(script).toContain('j.async=true');
+      expect(script).toContain('insertBefore');
+    });
+
+    it('should use default dataLayer name', () => {
+      const script = generateGtmScript({ containers: 'GTM-ABC123' });
+
+      expect(script).toContain("'dataLayer'");
+    });
+
+    it('should use custom dataLayer name', () => {
+      const script = generateGtmScript({ containers: 'GTM-ABC123', dataLayerName: 'myDL' });
+
+      expect(script).toContain("'myDL'");
+    });
+
+    it('should use custom host', () => {
+      const script = generateGtmScript({ containers: 'GTM-ABC123', host: 'https://gtm.example.com' });
+
+      expect(script).toContain('gtm.example.com/gtm.js');
+    });
+
+    it('should handle multiple containers', () => {
+      const script = generateGtmScript({ containers: ['GTM-ABC123', 'GTM-DEF456'] });
+
+      expect(script).toContain('GTM-ABC123');
+      expect(script).toContain('GTM-DEF456');
+    });
+
+    it('should throw for empty containers', () => {
+      expect(() => generateGtmScript({ containers: [] })).toThrow('At least one GTM container is required');
+    });
+
+    it('should throw for missing container id', () => {
+      expect(() => generateGtmScript({ containers: { id: '' } })).toThrow('Container id is required');
+    });
+
+    it('should throw for invalid dataLayerName (XSS prevention)', () => {
+      expect(() => generateGtmScript({ containers: 'GTM-ABC123', dataLayerName: "'; alert('XSS');" })).toThrow(
+        'Invalid dataLayerName'
+      );
+    });
+
+    it('should escape container IDs for XSS prevention', () => {
+      // Container IDs are escaped through escapeJsString
+      const script = generateGtmScript({ containers: 'GTM-ABC123' });
+      // Should not contain unescaped angle brackets
+      expect(script).not.toContain('<');
+      expect(script).not.toContain('>');
     });
   });
 

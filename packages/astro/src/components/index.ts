@@ -1,4 +1,10 @@
-export { generateScriptTags, generateNoscriptTags, generateDataLayerScript, DEFAULT_GTM_HOST } from './helpers';
+export {
+  generateScriptTags,
+  generateNoscriptTags,
+  generateDataLayerScript,
+  generateGtmScript,
+  DEFAULT_GTM_HOST
+} from './helpers';
 
 // Re-export URL utilities from core for backwards compatibility
 export {
