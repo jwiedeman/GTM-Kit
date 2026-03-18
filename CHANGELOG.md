@@ -1,3 +1,9 @@
+## [1.2.2](https://github.com/jwiedeman/GTM-Kit/compare/v1.2.1...v1.2.2) (2026-03-18)
+
+### Bug Fixes
+
+- **astro:** add generateGtmScript() — standard GTM snippet with gtm.start event ([7933f73](https://github.com/jwiedeman/GTM-Kit/commit/7933f73dc0cf456d0c1dc4e5cd41184e08d28b05)), closes [#130](https://github.com/jwiedeman/GTM-Kit/issues/130)
+
 ## [1.2.1](https://github.com/jwiedeman/GTM-Kit/compare/v1.2.0...v1.2.1) (2026-02-07)
 
 ### Bug Fixes
