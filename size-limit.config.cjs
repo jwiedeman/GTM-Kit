@@ -12,6 +12,12 @@ module.exports = [
     limit: '8.5 KB'
   }),
   withDefaults({
+    name: '@jwiedeman/gtm-kit/inspector',
+    path: 'packages/core/src/inspector.ts',
+    import: '{ installInspector }',
+    limit: '2 KB'
+  }),
+  withDefaults({
     name: '@jwiedeman/gtm-kit-react',
     path: 'packages/react-modern/src/index.ts',
     import: '{ GtmProvider }',

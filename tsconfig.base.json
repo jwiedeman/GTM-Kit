@@ -15,6 +15,7 @@
     "useDefineForClassFields": false,
     "paths": {
       "@jwiedeman/gtm-kit": ["./packages/core/src/index.ts"],
+      "@jwiedeman/gtm-kit/inspector": ["./packages/core/src/inspector.ts"],
       "@jwiedeman/gtm-kit-react": ["./packages/react-modern/src/index.ts"],
       "@jwiedeman/gtm-kit-react-legacy": ["./packages/react-legacy/src/index.ts"],
       "@jwiedeman/gtm-kit-next": ["./packages/next/src/index.ts"],

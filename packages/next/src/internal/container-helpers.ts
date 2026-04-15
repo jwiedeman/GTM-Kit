@@ -1,7 +1,6 @@
 // Re-export URL utilities from core for internal use
 export {
   DEFAULT_GTM_HOST,
-  normalizeContainer,
   normalizeContainers,
   buildGtmScriptUrl as buildScriptUrl,
   buildGtmNoscriptUrl as buildNoscriptUrl

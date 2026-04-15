@@ -79,14 +79,15 @@ Everything you need for production GTM implementations, out of the box:
 
 ### Developer Experience
 
-| Feature                | Description                                                    |
-| ---------------------- | -------------------------------------------------------------- |
-| **TypeScript Native**  | Full type definitions, autocomplete, compile-time safety.      |
-| **Framework Adapters** | React hooks, Vue composables, Next.js components, Nuxt module. |
-| **CLI Scaffolding**    | `npx @jwiedeman/gtm-kit-cli init` auto-detects framework.      |
-| **Ecommerce Helpers**  | Typed GA4 ecommerce events (purchase, add_to_cart, etc.).      |
-| **Custom DataLayer**   | Use any dataLayer name, not just `window.dataLayer`.           |
-| **Debug Logging**      | Optional verbose logging for development.                      |
+| Feature                 | Description                                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| **TypeScript Native**   | Full type definitions, autocomplete, compile-time safety.                                             |
+| **Framework Adapters**  | React hooks, Vue composables, Next.js components, Nuxt module.                                        |
+| **CLI Scaffolding**     | `npx @jwiedeman/gtm-kit-cli init` auto-detects framework.                                             |
+| **Ecommerce Helpers**   | Typed GA4 ecommerce events (purchase, add_to_cart, etc.).                                             |
+| **Custom DataLayer**    | Use any dataLayer name, not just `window.dataLayer`.                                                  |
+| **Debug Logging**       | Optional verbose logging for development.                                                             |
+| **DataLayer Inspector** | `window.__gtmKit` console helpers — dump, watch, filter events live. Zero-cost tree-shakeable opt-in. |
 
 ### Framework-Specific Features
 
@@ -416,6 +417,33 @@ pushEcommerce(client, 'add_to_cart', {
   items: [{ item_id: 'SKU-001', item_name: 'Blue T-Shirt', price: 40, quantity: 1 }]
 });
 ```
+
+---
+
+## DataLayer Inspector
+
+Debug GTM integrations from the browser console. Import the inspector only in development — it's a separate entry point, so production bundles stay lean.
+
+```ts
+// Vite / Next / any bundler with DEV flag
+if (import.meta.env.DEV) {
+  const { installInspector } = await import('@jwiedeman/gtm-kit/inspector');
+  installInspector(client);
+}
+```
+
+Then, in DevTools:
+
+```js
+__gtmKit.dump(); // console.table every dataLayer entry
+__gtmKit.status(); // init/ready state, script load times, queue size
+__gtmKit.filter(/^view_/); // only events matching a pattern
+const stop = __gtmKit.watch(); // stream every future push as it happens
+stop(); // detach
+__gtmKit.uninstall(); // remove everything
+```
+
+Rename the global with `installInspector(client, { globalKey: 'myDebugger' })` if `__gtmKit` clashes with your app. Works with any custom `dataLayerName`.
 
 ---
 

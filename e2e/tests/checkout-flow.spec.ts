@@ -125,10 +125,8 @@ test.describe('Complete Checkout Flow', () => {
       await page.goto(`${server.url}/products`, { waitUntil: 'networkidle' });
 
       // Wait for products to load
-      await page.waitForSelector('.product-card, [data-testid="product-card"]', { timeout: 5000 }).catch(() => {});
-
-      // Click on a product
       const productCard = page.locator('.product-card, [data-testid="product-card"]').first();
+      await productCard.waitFor({ timeout: 5000 }).catch(() => {});
       if ((await productCard.count()) > 0) {
         await productCard.click();
 

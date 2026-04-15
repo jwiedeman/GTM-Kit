@@ -3,7 +3,7 @@ import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { useGtmConsent, useGtmPush, useGtmClient } from '@jwiedeman/gtm-kit-react';
 import { pushEcommerce } from '@jwiedeman/gtm-kit';
 
-const consentDefaults = {
+export const consentDefaults = {
   ad_storage: 'denied',
   analytics_storage: 'denied',
   ad_personalization: 'denied',
@@ -126,12 +126,8 @@ const useRouteAwarePageView = (): void => {
 };
 
 const ConsentControls = () => {
-  const { setConsentDefaults, updateConsent } = useGtmConsent();
+  const { updateConsent } = useGtmConsent();
   const [consent, setConsent] = useState<'denied' | 'granted'>('denied');
-
-  useEffect(() => {
-    setConsentDefaults(consentDefaults);
-  }, [setConsentDefaults]);
 
   const handleGrant = useCallback(() => {
     setConsent('granted');

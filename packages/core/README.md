@@ -216,6 +216,30 @@ installAutoQueue({
 
 ---
 
+## DataLayer Inspector (dev-only)
+
+A tree-shakeable dev helper that exposes `window.__gtmKit` in the browser. Import it from the separate `/inspector` subpath so production bundles stay untouched:
+
+```ts
+if (import.meta.env.DEV) {
+  const { installInspector } = await import('@jwiedeman/gtm-kit/inspector');
+  installInspector(client);
+}
+```
+
+In DevTools:
+
+```js
+__gtmKit.dump(); // console.table of every dataLayer entry
+__gtmKit.status(); // diagnostics: containers, script load times, queue size
+__gtmKit.filter(/^view_/); // match events by substring or regex
+const stop = __gtmKit.watch(); // stream every future push
+stop(); // detach
+__gtmKit.uninstall(); // remove everything
+```
+
+Pass `installInspector(client, { globalKey: 'myDebugger' })` if the default name collides with your app. The inspector is self-contained — just 1 KB gzipped, zero deps, works with any `dataLayerName`.
+
 ## Framework Adapters
 
 While `@jwiedeman/gtm-kit` works standalone, we provide framework-specific adapters for better ergonomics:

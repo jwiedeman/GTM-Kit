@@ -13,6 +13,8 @@ const getDataLayer = async <T>(page: Page): Promise<T[]> => {
   });
 };
 
+test.describe.configure({ mode: 'serial' });
+
 test.describe('Nuxt 3 App example', () => {
   let server: NuxtAppServer;
 

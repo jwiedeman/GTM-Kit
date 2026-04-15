@@ -34,6 +34,8 @@ const decodeCookieValue = (value?: string | null): string => {
   return decoded;
 };
 
+test.describe.configure({ mode: 'serial' });
+
 test.describe('Next.js App Router example', () => {
   let server: NextAppServer;
 
@@ -53,10 +55,11 @@ test.describe('Next.js App Router example', () => {
     await expect(scriptLocator).toHaveAttribute('src', /l=nextAppDataLayer/);
     await expect(scriptLocator).toHaveAttribute('nonce', /.+/);
 
-    const noscript = page.locator('body > noscript');
-    await expect(noscript).toHaveCount(1);
-    const noscriptHtml = await noscript.evaluate((element) => element.innerHTML || '');
-    const normalizedNoscriptHtml = noscriptHtml.replace(/&amp;/g, '&');
+    // React removes <noscript> from the DOM after hydration, so verify it in the SSR HTML response.
+    const ssrHtml = await (await page.request.get(server.url)).text();
+    const noscriptMatch = ssrHtml.match(/<noscript>[\s\S]*?<\/noscript>/);
+    expect(noscriptMatch).not.toBeNull();
+    const normalizedNoscriptHtml = (noscriptMatch?.[0] ?? '').replace(/&amp;/g, '&');
     expect(normalizedNoscriptHtml).toContain(
       'https://www.googletagmanager.com/ns.html?id=GTM-NEXTAPP&l=nextAppDataLayer'
     );
@@ -112,10 +115,7 @@ test.describe('Next.js App Router example', () => {
       true
     );
 
-    await page
-      .getByRole('navigation', { name: 'Primary' })
-      .getByRole('link', { name: 'Analytics Suite' })
-      .click();
+    await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Analytics Suite' }).click();
     await expect(page).toHaveURL(/\/products\/analytics-suite$/);
 
     await page.waitForFunction(() => {

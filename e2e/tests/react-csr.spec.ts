@@ -12,6 +12,8 @@ const getDataLayer = async <T>(page: Page): Promise<T[]> => {
   });
 };
 
+test.describe.configure({ mode: 'serial' });
+
 test.describe('React CSR (StrictMode) example', () => {
   let server: ReactCsrServer;
 

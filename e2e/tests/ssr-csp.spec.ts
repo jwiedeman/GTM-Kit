@@ -19,10 +19,9 @@ test.describe('SSR CSP + noscript integration', () => {
     const containerScripts = page.locator('script[data-gtm-container-id="GTM-TEST"]');
     await expect(containerScripts).toHaveCount(1);
 
-    await expect(containerScripts).toHaveAttribute('nonce', '');
-
+    // Under CSP, Chromium hides the nonce content attribute (returns null/empty) but preserves
+    // the IDL nonce property, which is exposed via the bootstrap below.
     const body = page.locator('body');
-    await expect(body).toHaveAttribute('data-gtm-nonce-attr', '');
     await expect(body).toHaveAttribute('data-gtm-nonce-prop', 'test-nonce-123');
     await expect(containerScripts).toHaveAttribute(
       'src',

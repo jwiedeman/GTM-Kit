@@ -3,6 +3,12 @@
 Use this checklist when replacing hand-rolled GTM snippets or third-party wrappers with
 React GTM Kit.
 
+> **Swapping a specific library?** See the step-by-step guides:
+>
+> - [From `react-gtm-module`](./migrations/from-react-gtm-module.md)
+> - [From `@next/third-parties/google`](./migrations/from-next-third-parties.md)
+> - [From `@gtm-support/vue-gtm`](./migrations/from-vue-gtm.md)
+
 ## Audit your current setup
 
 1. Inventory every place GTM initializes. Remove duplicate snippets to avoid multiple

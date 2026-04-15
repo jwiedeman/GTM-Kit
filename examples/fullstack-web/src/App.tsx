@@ -64,7 +64,7 @@ declare global {
   }
 }
 
-const consentDefaults = {
+export const consentDefaults = {
   ad_storage: 'denied',
   analytics_storage: 'denied',
   ad_personalization: 'denied',
@@ -205,7 +205,7 @@ const readConsentState = (): Record<string, string> | undefined => {
 
 const App = (): JSX.Element => {
   const push = useGtmPush();
-  const { setConsentDefaults, updateConsent } = useGtmConsent();
+  const { updateConsent } = useGtmConsent();
   const dataLayerEntries = useDataLayerSnapshot();
   const [consent, setConsent] = useState<ConsentState>('denied');
   const [relayUrl, setRelayUrl] = useState<string>(defaultRelayUrl);
@@ -214,10 +214,6 @@ const App = (): JSX.Element => {
   const [lastRequest, setLastRequest] = useState<string>('');
   const [lastResponse, setLastResponse] = useState<string>('');
   const [purchaseCount, setPurchaseCount] = useState(0);
-
-  useEffect(() => {
-    setConsentDefaults(consentDefaults);
-  }, [setConsentDefaults]);
 
   const consentSummary = useMemo(() => formatJson({ consent, defaults: consentDefaults }), [consent]);
 

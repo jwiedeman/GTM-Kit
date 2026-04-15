@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { GtmProvider } from '@jwiedeman/gtm-kit-react';
-import App from './App';
+import App, { consentDefaults } from './App';
 import './styles.css';
 
 type QueryParams = Record<string, string>;
@@ -38,6 +38,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         defaultQueryParams: Object.keys(defaultQueryParams).length ? defaultQueryParams : undefined,
         logger: import.meta.env.DEV ? console : undefined
       }}
+      onBeforeInit={(client) => client.setConsentDefaults(consentDefaults)}
     >
       <App />
     </GtmProvider>

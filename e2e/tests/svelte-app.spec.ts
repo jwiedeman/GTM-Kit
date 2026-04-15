@@ -13,6 +13,8 @@ const getDataLayer = async <T>(page: Page): Promise<T[]> => {
   });
 };
 
+test.describe.configure({ mode: 'serial' });
+
 test.describe('SvelteKit App example', () => {
   let server: SvelteAppServer;
 
