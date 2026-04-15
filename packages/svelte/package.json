@@ -57,7 +57,7 @@
     "svelte": "^4.0.0 || ^5.0.0"
   },
   "devDependencies": {
-    "@testing-library/svelte": "^5.2.0",
+    "@testing-library/svelte": "^5.3.1",
     "svelte": "^4.2.18",
     "svelte-jester": "^5.0.0",
     "tslib": "^2.6.2"
