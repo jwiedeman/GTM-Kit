@@ -12,6 +12,6 @@
   "dependencies": {
     "@astrojs/node": "^9.0.0",
     "@jwiedeman/gtm-kit-astro": "workspace:*",
-    "astro": "^5.1.9"
+    "astro": "^5.17.1"
   }
 }
