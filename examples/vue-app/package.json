@@ -14,7 +14,7 @@
   "dependencies": {
     "@jwiedeman/gtm-kit-vue": "workspace:*",
     "@jwiedeman/gtm-kit": "workspace:*",
-    "vue": "^3.4.21",
+    "vue": "^3.5.27",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
