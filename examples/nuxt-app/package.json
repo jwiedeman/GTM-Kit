@@ -22,7 +22,7 @@
     "@vue/eslint-config-typescript": "^13.0.0",
     "eslint-plugin-vue": "^9.26.0",
     "nuxt": "^3.11.0",
-    "typescript": "^5.4.5",
+    "typescript": "^5.9.3",
     "vue": "^3.4.21",
     "vue-tsc": "^2.1.6"
   }
