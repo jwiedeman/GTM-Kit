@@ -65,7 +65,7 @@ jobs:
         run: pnpm run ${{ matrix.task }}
       - name: Upload coverage to Codecov
         if: ${{ matrix.task == 'test' && env.CODECOV_TOKEN != '' }}
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           files: |
             packages/core/coverage/unit/lcov.info
